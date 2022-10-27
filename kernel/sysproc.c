@@ -7,6 +7,18 @@
 #include "proc.h"
 
 uint64
+sys_trace(void)
+{
+  int mask;
+  argint(0, &mask);
+  if(mask < 0){
+    return -1;
+  }
+  myproc()->mask = mask;
+  return 0;
+}
+
+uint64
 sys_exit(void)
 {
   int n;
