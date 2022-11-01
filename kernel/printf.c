@@ -116,8 +116,26 @@ printf(char *fmt, ...)
 }
 
 void
+backtrace(){
+  printf("backtrace:\n");
+
+  uint64 fp;
+  fp = r_fp();
+
+  while(fp > PGROUNDDOWN(fp)){
+
+    printf("%p\n", *(uint64*)(fp-8));
+    fp = *(uint64*)(fp-16);
+  }
+}
+
+
+
+void
 panic(char *s)
 {
+  
+  backtrace();
   pr.locking = 0;
   printf("panic: ");
   printf(s);
