@@ -438,22 +438,54 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
   }
 }
 
+/*
+void
+_vmprint(pagetable_t pagetable, int level) {
+  for (int i = 0; i < 512; i++) {
+    pte_t pte = pagetable[i];
+    if (pte & PTE_V) {
+      uint64 child = PTE2PA(pte);
+      for (int j = 0; j < 3 - level; j++) {
+        printf(" ..");
+      }
+      printf("%d: pte %p pa %p\n", i, pte, child);
+      if (level) {
+        _vmprint((pagetable_t) child, level - 1);
+      }
+    }
+  }
+}
+
+void
+vmprint(pagetable_t pagetable) {
+  printf("page table %p\n", pagetable);
+  _vmprint(pagetable, 2);
+}
+*/
+int depth = 1;
+int init = 0;
 void
 vmprint(pagetable_t pagetable)
 {
-  // there are 2^9 = 512 PTEs in a page table.
+  if(init == 0){printf("page table %p\n", pagetable); init = 1;}
+  //printf("page table %p\n", pagetable);
   for(int i = 0; i < 512; i++){
     pte_t pte = pagetable[i];
     if((pte & PTE_V) && (pte & (PTE_R|PTE_W|PTE_X)) == 0){
-      // this PTE points to a lower-level page table.
+      if(depth > 2){depth = 1;}
       uint64 child = PTE2PA(pte);
-      freewalk((pagetable_t)child);
-      pagetable[i] = 0;
-    } else if(pte & PTE_V){
-      panic("freewalk: leaf");
+      for(int j = 0; j < depth; j++){
+        printf(" ..");
+      }
+      depth++;
+      printf("%d: pte %p pa %p\n", i, pte, PTE2PA(pte)); 
+      vmprint((pagetable_t)child);
+    }else if((pte & PTE_V)){
+      for(int j = 0; j < depth; j++){
+        printf(" ..");
+      }
+     printf("%d: pte %p pa %p\n", i, pte, PTE2PA(pte));
     }
   }
-  kfree((void*)pagetable);
 }
-
 
