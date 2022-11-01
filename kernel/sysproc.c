@@ -9,6 +9,16 @@
 uint64
 sys_sigalarm(void){
 
+  int interval;
+  uint64 handler;
+
+  argint(0, &interval);
+  argaddr(1, &handler);
+  
+  if(interval < 0 || handler < 0){return -1;}
+
+  myproc()->alarm_interval = interval;
+  myproc()->alarm_handler = handler;
   return 0;
 }
 
