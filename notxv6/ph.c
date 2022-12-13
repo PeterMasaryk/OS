@@ -17,6 +17,8 @@ struct entry *table[NBUCKET];
 int keys[NKEYS];
 int nthread = 1;
 
+pthread_mutex_t lock;            // deklarácia zámku
+
 
 double
 now()
@@ -40,8 +42,7 @@ static
 void put(int key, int value)
 {
   int i = key % NBUCKET;
-
-  // is the key already present?
+// is the key already present?
   struct entry *e = 0;
   for (e = table[i]; e != 0; e = e->next) {
     if (e->key == key)
@@ -52,7 +53,10 @@ void put(int key, int value)
     e->value = value;
   } else {
     // the new is new.
+    pthread_mutex_lock(&lock);       // zamkni/získaj zámok
     insert(key, value, &table[i], table[i]);
+    pthread_mutex_unlock(&lock);     // odomkni/uvoľni zámok
+   
   }
 
 }
@@ -104,7 +108,8 @@ main(int argc, char *argv[])
   pthread_t *tha;
   void *value;
   double t1, t0;
-
+  pthread_mutex_init(&lock, NULL); // inicializácia zámku
+ 
 
   if (argc < 2) {
     fprintf(stderr, "Usage: %s nthreads\n", argv[0]);
