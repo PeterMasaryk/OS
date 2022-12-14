@@ -51,6 +51,7 @@ fdalloc(struct file *f)
   return -1;
 }
 
+
 uint64
 sys_dup(void)
 {
@@ -167,6 +168,13 @@ bad:
   iunlockput(ip);
   end_op();
   return -1;
+}
+
+uint64
+sys_symlink(void){
+  
+
+  return 0;
 }
 
 // Is the directory dp empty except for "." and ".." ?
